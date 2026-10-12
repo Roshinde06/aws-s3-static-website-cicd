@@ -1,177 +1,106 @@
-# AWS S3 Static Website Deployment using GitHub Actions
+# AWS Static Website Hosting with CI/CD using GitHub Actions
 
-A beginner-friendly Cloud/DevOps project that demonstrates how to deploy
-a static website to **Amazon S3** automatically using **GitHub
-Actions**.
+## 📌 Project Overview
 
-## Project Overview
+This project demonstrates static website hosting using Amazon S3, with GitHub Actions for automated deployment and Amazon CloudFront for content delivery.
 
-This project uses GitHub Actions to upload website files from a GitHub
-repository to an Amazon S3 bucket whenever code is pushed to the `main`
-branch.
+I configured AWS resources using the **AWS Management Console (GUI)** and created a GitHub Actions workflow to automate website deployment.
 
-### Tools and Services
+**Project status:** Completed as a hands-on learning exercise. AWS resources were removed after testing to avoid unnecessary costs. The previous CloudFront URL may no longer be active.
 
--   **Amazon S3** --- stores and hosts the static website files
--   **AWS IAM** --- controls deployment permissions
--   **GitHub** --- source code repository
--   **GitHub Actions** --- automates the deployment (CI/CD)
--   **AWS CLI** --- syncs the website files to S3
+## 🛠️ Technologies Used
 
-## Architecture
+- **Amazon S3** – Static website hosting and file storage
+- **Amazon CloudFront** – Content delivery and caching
+- **GitHub Actions** – CI/CD workflow automation
+- **AWS IAM** – Access and permission management
+- **AWS Management Console** – AWS resource configuration
+- **GitHub Secrets and Variables** – Deployment credentials and configuration
 
-``` text
-Developer
-   |
-   | git push
-   v
-GitHub Repository (main)
-   |
-   v
-GitHub Actions Workflow
-   |
-   | AWS credentials from GitHub Secrets
-   v
-Amazon S3 Bucket
-   |
-   v
-Static Website Endpoint
-```
+## 🏗️ Architecture
 
-## Repository Structure
+Developer → GitHub Repository → GitHub Actions → Amazon S3 → Static Website
 
-``` text
+Amazon CloudFront was configured for content delivery and caching.
+
+## ✨ Project Features
+
+- Hosted a static portfolio website using Amazon S3.
+- Configured CloudFront for content delivery.
+- Created a GitHub Actions workflow triggered by pushes to the `main` branch.
+- Automated website file synchronization to S3.
+- Configured GitHub repository secrets and variables.
+- Added a CloudFront cache invalidation step to the deployment workflow.
+- Practised troubleshooting AWS credentials, configuration, and permissions.
+
+## 📂 Repository Structure
+
+```text
 aws-s3-static-website-cicd/
 ├── .github/
 │   └── workflows/
 │       └── main.yml
-├── index.html
-├── style.css
-├── script.js
+├── cloud_devops_portfolio/
+│   ├── index.html
+│   ├── style.css
+│   └── script.js
 └── README.md
 ```
 
-> Your workflow filename may be different. Update the structure above to
-> match your repository.
+*Adjust the filenames if your actual repository structure differs.*
 
-## AWS Setup
+## ⚙️ CI/CD Workflow
 
-1.  Create an S3 bucket in your preferred AWS Region.
-2.  Enable **Static website hosting** in the bucket's **Properties**
-    tab.
-3.  Set the index document to `index.html`.
-4.  Note the bucket name, Region, and website endpoint.
-5.  Create a dedicated IAM identity with only the permissions required
-    to deploy to this bucket.
+1. Push website changes to the `main` branch.
+2. GitHub Actions checks out the repository.
+3. AWS credentials are configured using GitHub Secrets.
+4. Website files are synchronized with the S3 bucket.
+5. The workflow requests CloudFront cache invalidation to help deliver updated content.
 
-For a direct S3 website endpoint, configure access appropriately. S3
-website endpoints do not support HTTPS. For a more secure production
-setup, keep the bucket private and use Amazon CloudFront with Origin
-Access Control.
+The CloudFront invalidation step requires a valid distribution ID and appropriate IAM permissions.
 
-## GitHub Secrets and Variables
+## 🔐 GitHub Configuration
 
-In your GitHub repository, open:
+### Repository Secrets
 
-**Settings → Secrets and variables → Actions**
+| Secret | Purpose |
+|---|---|
+| `AWS_ACCESS_KEY_ID` | AWS access key |
+| `AWS_SECRET_ACCESS_KEY` | AWS secret access key |
 
-Add these repository secrets if your workflow uses IAM access keys:
+### Repository Variables
 
-  -----------------------------------------------------------------------
-  Name                                Value
-  ----------------------------------- -----------------------------------
-  `AWS_ACCESS_KEY_ID`                 Access key ID for the dedicated
-                                      deployment IAM user
+| Variable | Purpose |
+|---|---|
+| `S3_BUCKET_NAME` | Target S3 bucket name |
+| `CLOUDFRONT_DISTRIBUTION_ID` | CloudFront distribution ID |
 
-  `AWS_SECRET_ACCESS_KEY`             Secret access key for that IAM user
-  -----------------------------------------------------------------------
+**Security:** Never commit AWS credentials or tokens to GitHub. Use GitHub Secrets and appropriately scoped IAM permissions.
 
-Add this repository variable:
+## 📚 What I Learned
 
-  Name               Value
-  ------------------ ---------------------------
-  `S3_BUCKET_NAME`   Your exact S3 bucket name
+- Static website hosting with Amazon S3.
+- Configuring AWS services through the management console.
+- Automating deployments using GitHub Actions.
+- Managing repository secrets and variables.
+- Understanding AWS IAM permissions and CloudFront cache invalidation.
+- Troubleshooting CI/CD workflow errors.
+- Managing cloud costs by removing unused resources.
 
-Use the AWS Region where your bucket was created. This project currently
-uses **Mumbai (`ap-south-1`)**.
+## 🚧 Challenges and Improvements
 
-**Security:** Never commit AWS credentials to the repository or share
-them publicly. Do not use an IAM user's administrator credentials.
-Prefer GitHub Actions OIDC with short-lived credentials when you are
-ready to configure it.
+During this project, I practised troubleshooting deployment configuration and AWS permissions. I also learned the importance of verifying each pipeline step and monitoring cloud costs.
 
-## GitHub Actions Workflow
+Possible future improvements:
+- Use GitHub Actions OIDC with an IAM role instead of long-lived access keys.
+- Add automated website validation.
+- Improve pipeline error handling.
+- Recreate the infrastructure when needed while monitoring costs.
 
-The workflow should:
+## 🔗 GitHub Repository
 
-1.  Check out the repository.
-2.  Configure AWS credentials.
-3.  Sync the website files to the S3 bucket.
+https://github.com/Roshinde06/aws-s3-static-website-cicd
 
-Example deployment command:
+---
 
-``` bash
-aws s3 sync . s3://YOUR-BUCKET-NAME \
-  --delete \
-  --exclude ".git/*" \
-  --exclude ".github/*" \
-  --exclude "README.md"
-```
-
-Replace `YOUR-BUCKET-NAME` with your bucket name. The `--delete` option
-removes objects from the destination bucket that are not present in the
-source directory. Use it only when that behavior is intended.
-
-## How to Deploy
-
-1.  Add or update your website files in the repository.
-2.  Commit and push the changes to the `main` branch.
-3.  Open the **Actions** tab in GitHub.
-4.  Select the deployment workflow and inspect the run.
-5.  Confirm that all workflow steps succeed.
-6.  Open the S3 static website endpoint to check the website.
-
-Every new push to `main` can trigger another deployment, depending on
-your workflow configuration.
-
-## Troubleshooting
-
-  -----------------------------------------------------------------------
-  Error                               What to check
-  ----------------------------------- -----------------------------------
-  `Unable to locate credentials`      Check that the GitHub secret names
-                                      match the workflow.
-
-  `AccessDenied`                      Check the IAM permissions and
-                                      bucket policy.
-
-  `NoSuchBucket`                      Verify the bucket name and Region.
-
-  `Invalid workflow file`             Check YAML syntax and indentation.
-
-  Website shows `403 Forbidden`       Check the S3 website access
-                                      configuration and permissions.
-
-  Website shows `404 Not Found`       Confirm that `index.html` was
-                                      uploaded and configured as the
-                                      index document.
-  -----------------------------------------------------------------------
-
-## What I Learned
-
--   Creating and configuring an S3 static website
--   Using IAM permissions for a deployment task
--   Managing GitHub Actions secrets
--   Automating deployments with a CI/CD workflow
--   Troubleshooting AWS deployment errors
-
-## Project Status
-
-**In progress** --- configuring and testing the GitHub Actions
-deployment workflow.
-
-## Author
-
-**Roshani Shinde**
-
-Cloud & DevOps Learner \| AWS \| Linux \| Docker \| GitHub Actions
+*This project is part of my practical learning journey in AWS, Cloud Computing, and DevOps.*
